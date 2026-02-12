@@ -1,0 +1,100 @@
+basePath: /api/v1
+definitions:
+  http.ApplyRequest:
+    properties:
+      amount:
+        example: 1000
+        type: integer
+      operationType:
+        example: DEPOSIT
+        type: string
+      walletId:
+        example: 11111111-1111-1111-1111-111111111111
+        type: string
+    required:
+    - amount
+    - operationType
+    - walletId
+    type: object
+  http.BalanceResponse:
+    properties:
+      balance:
+        example: 1000
+        type: integer
+    type: object
+  http.ErrorResponse:
+    properties:
+      error:
+        example: invalid request
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API для управления кошельками
+  title: Wallet API
+  version: "1.0"
+paths:
+  /wallet:
+    post:
+      consumes:
+      - application/json
+      description: Выполняет операцию пополнения или снятия средств с кошелька
+      parameters:
+      - description: Данные операции
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/http.ApplyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Новый баланс
+          schema:
+            $ref: '#/definitions/http.BalanceResponse'
+        "400":
+          description: Ошибка валидации
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Кошелек не найден
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Применить операцию к кошельку
+      tags:
+      - wallet
+  /wallets/{id}:
+    get:
+      description: Возвращает текущий баланс указанного кошелька
+      parameters:
+      - description: ID кошелька
+        example: 11111111-1111-1111-1111-111111111111
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Баланс кошелька
+          schema:
+            $ref: '#/definitions/http.BalanceResponse'
+        "404":
+          description: Кошелек не найден
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Получить баланс кошелька
+      tags:
+      - wallet
+swagger: "2.0"

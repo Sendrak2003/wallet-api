@@ -1,0 +1,8 @@
+.vs
+.vscode
+bin/
+vendor/
+.env
+*.log
+*.exe
+*.test
