@@ -17,7 +17,9 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	_ "wallet-api/docs"
+	"wallet-api/internal/config"
 	httpHandler "wallet-api/internal/handler/http"
+	"wallet-api/internal/middleware"
 	"wallet-api/internal/repository"
 	"wallet-api/internal/service"
 )
@@ -29,6 +31,12 @@ import (
 // @BasePath /api/v1
 
 func main() {
+	validator := config.NewEnvironmentValidator()
+	if err := validator.ValidateAll(); err != nil {
+		log.Fatalf("Ошибка валидации окружения: %v", err)
+	}
+	log.Println("Валидация переменных окружения прошла успешно")
+
 	port := os.Getenv("APP_PORT")
 	if port == "" {
 		port = "8080"
@@ -65,6 +73,8 @@ func main() {
 	handler := httpHandler.NewWalletHandler(svc)
 
 	router := gin.Default()
+
+	router.Use(middleware.NewPanicRecoveryMiddleware(nil))
 
 	router.GET("/health", func(c *gin.Context) {
 		if err := db.Ping(); err != nil {

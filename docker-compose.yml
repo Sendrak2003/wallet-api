@@ -4,10 +4,9 @@ services:
   postgres:
     image: postgres:15
     container_name: wallet_postgres
+    env_file:
+      - config.env
     environment:
-      POSTGRES_USER: wallet
-      POSTGRES_PASSWORD: wallet
-      POSTGRES_DB: wallet
       POSTGRES_HOST_AUTH_METHOD: md5
     ports:
       - "5432:5432"
@@ -15,7 +14,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./migrations:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U wallet -d wallet"]
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -23,16 +22,11 @@ services:
   app:
     build: .
     container_name: wallet_app
+    env_file:
+      - config.env
     depends_on:
       postgres:
         condition: service_healthy
-    environment:
-      APP_PORT: 8080
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: wallet
-      DB_PASSWORD: wallet
-      DB_NAME: wallet
     ports:
       - "8080:8080"
     restart: on-failure
